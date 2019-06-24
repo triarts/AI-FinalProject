@@ -18,8 +18,8 @@ public class CSVFile {
 
 
 
-    public List read() {
-        List resultList = new ArrayList();
+    public List<String[]> read() {
+        List resultList = new ArrayList<String[]>();
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         try {
             String csvLine;

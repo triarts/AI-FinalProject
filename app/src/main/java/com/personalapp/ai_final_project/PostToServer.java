@@ -2,6 +2,7 @@ package com.personalapp.ai_final_project;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -20,10 +21,42 @@ import java.util.Map;
 
 public class PostToServer {
 
-    public PostToServer()
-    {
+    String URL;
+    Context con;
+    Map<String, String> postParam;
+    static TextView tvLog;
+
+    public PostToServer() {
 
     }
+
+    public PostToServer(String url, final Context con, Map<String, String> postParam) {
+        this.URL = url;
+        this.con = con;
+        this.postParam = postParam;
+    }
+
+    public void setAllVariable(String url, final Context con, Map<String, String> postParam)
+    {
+        this.URL = url;
+        this.con = con;
+        this.postParam = postParam;
+    }
+
+    public void setPostParam(Map<String, String> postParam) {
+        this.postParam = postParam;
+    }
+
+    public void execute()
+    {
+        this.postRequest(URL,con,postParam);
+    }
+
+    public void setTextViewLog(TextView tvlog)
+    {
+        this.tvLog = tvlog;
+    }
+
 
     public static void postRequest(String url, final Context con, Map<String, String> postParam) {
         final String TAG = "Volley-Result";
@@ -37,6 +70,7 @@ public class PostToServer {
                     @Override
                     public void onResponse(JSONObject response) {
                         Log.d(TAG, response.toString());
+                        tvLog.append(response.toString());
                         Toast.makeText(con, response.toString(), Toast.LENGTH_SHORT).show();
                     }
                 }, new Response.ErrorListener() {
