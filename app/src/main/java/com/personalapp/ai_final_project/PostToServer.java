@@ -77,7 +77,7 @@ public class PostToServer {
                         Log.d(TAG, response.toString());
                         tvLog.setText(response.toString()+tvLog.getText());
                         //tvLog.append(response.toString());
-                        Toast.makeText(con, response.toString(), Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(con, response.toString(), Toast.LENGTH_SHORT).show();
                     }
                 }, new Response.ErrorListener() {
 

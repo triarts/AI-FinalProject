@@ -43,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
     final PostToServer mPostToServer = new PostToServer();
     String[] changedhb;
     List<String[]> listHBCSV;
+
+    boolean flagRandom = true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,10 +71,14 @@ public class MainActivity extends AppCompatActivity {
         seekBarInterval.setOnSeekBarChangeListener(mSeekbarListener);
 
 
-        InputStream inputStream = getResources().openRawResource(glob.csv_small);
+        InputStream inputStream = getResources().openRawResource(glob.csv_filtered);
         csvFile = new CSVFile(inputStream);
         listHBCSV = csvFile.read();
-        Collections.shuffle(listHBCSV);
+        if(flagRandom)
+        {
+            Collections.shuffle(listHBCSV);
+        }
+
         //tvLog.append(PostToServer.StringArrayCombine(list.get(0)));
 
 
@@ -130,7 +136,10 @@ public class MainActivity extends AppCompatActivity {
     {
         if(currentRowIndex+samplePerInterval() >= datazise) {
             //reset kalau sudah mentok
-            Collections.shuffle(listHBCSV);
+            if(flagRandom)
+            {
+                Collections.shuffle(listHBCSV);
+            }
             currentRowIndex = 0;
         }
 
@@ -175,20 +184,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onStartTrackingTouch(SeekBar seekBar) {
-
-
-        }
+        public void onStartTrackingTouch(SeekBar seekBar) { }
 
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-//            setupArrListSample();
-//            mPostToServer.setPostParam(PostToServer.setJson(glob.keyJson,setupArrListSample()));
-
-
-//            ArrList.add(PostToServer.StringArrayCombine(changedhb));
-
             tvSamplePerInterval.setText(""+samplePerInterval());
         }
     }
@@ -208,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
                 else
                 {
                     startStop = true;
-                    tvLog.setText("Cont\n"+tvLog.getText());
+                    tvLog.setText("Continue\n"+tvLog.getText());
                     btnStartStop.setText("Pause");
                 }
             }

@@ -17,7 +17,7 @@ public class Global {
         csv_full = R.raw.mitbih_test_number_format;
         csv_500 = R.raw.mitbih_test;
         csv_small = R.raw.mitbih_test_small;
-        csv_filtered = 0;
+        csv_filtered = R.raw.mitbih_test_filter;
 
         keyJson = "hb";
     }
