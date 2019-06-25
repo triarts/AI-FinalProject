@@ -13,6 +13,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,11 +33,12 @@ public class MainActivity extends AppCompatActivity {
     Global glob = new Global();
     CSVFile csvFile;
     SeekBar seekBarBpm,seekBarInterval;
+    Button btnStartStop; boolean startStop = true; clickListener mclickListener = new clickListener();
     seekBarListener mSeekbarListener = new seekBarListener();
     int BpmMax = 120, BpmMin = 60, BpmStep = 1;
     int InterMax = 10, InterMin = 1, InterStep = 1;
     int currentBpm = 60;
-    List ArrList;
+    //List ArrList;
     List rowList; int currentRowIndex=0;
     final PostToServer mPostToServer = new PostToServer();
     String[] changedhb;
@@ -53,6 +56,9 @@ public class MainActivity extends AppCompatActivity {
         tvSamplePerInterval = (TextView)findViewById(R.id.tvSamplePerInterval);
         currentBpm = 60;
 
+        btnStartStop = (Button) findViewById(R.id.btnStartStop);
+        btnStartStop.setOnClickListener(mclickListener);
+
 
         seekBarBpm=(SeekBar)findViewById(R.id.seekBarBpm);
         seekBarBpm.setMax( (BpmMax - BpmMin) / BpmStep );
@@ -63,13 +69,13 @@ public class MainActivity extends AppCompatActivity {
         seekBarInterval.setOnSeekBarChangeListener(mSeekbarListener);
 
 
-        InputStream inputStream = getResources().openRawResource(glob.csv_500);
+        InputStream inputStream = getResources().openRawResource(glob.csv_small);
         csvFile = new CSVFile(inputStream);
         listHBCSV = csvFile.read();
         Collections.shuffle(listHBCSV);
         //tvLog.append(PostToServer.StringArrayCombine(list.get(0)));
 
-        ArrList = new ArrayList<String>();
+
 //        ArrList.add(PostToServer.StringArrayCombine(list.get(0)));
 //        ArrList.add(PostToServer.StringArrayCombine(list.get(1)));
 //        changedhb = list.get(1);
@@ -77,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
         //PostToServer.postRequest(glob.defaultURL,MainActivity.this,PostToServer.setJson("hb",ArrList));
         setupArrListSample();
         mPostToServer.setTextViewLog(tvLog);
-        mPostToServer.setAllVariable(glob.defaultURL,MainActivity.this,PostToServer.setJson("hb",ArrList));
+        mPostToServer.setAllVariable(glob.defaultURL,MainActivity.this,PostToServer.setJson(glob.keyJson,setupArrListSample()));
 
 
 
@@ -88,8 +94,12 @@ public class MainActivity extends AppCompatActivity {
             int count = 5;
             public void run(){
                 //do something
-                Log.d("interval","handler");
-                mPostToServer.execute();
+                if(startStop)
+                {
+                    Log.d("interval","handler");
+                    mPostToServer.execute();
+                    mPostToServer.bridge(setupArrListSample(),mPostToServer,glob.keyJson);
+                }
                 handler.postDelayed(this, delay);
             }
         }, delay);
@@ -104,27 +114,26 @@ public class MainActivity extends AppCompatActivity {
         tvHBnum.setText(""+currentBpm);
     }
 
+    //untuk tentuin brapa banyaks ampel yang di kirim per interval
     int fixedInterval = 5;//second
     public int samplePerInterval()
     {
         float totalSample = ((float)currentBpm/60)*(float)fixedInterval;
         Log.d(TAG,String.valueOf(Math.ceil(totalSample)));
-        return (int)Math.ceil(totalSample);
+        return (int)Math.ceil(totalSample); // real
+        //return 3; // testing
     }
 
-//    public void setHBRandomRow()
-//    {
-//        rowList = new ArrayList<Integer>();
-//        for(int i=0;i<listHBCSV.size();i++)
-//        {
-//            rowList.add(i);
-//        }
-//        Collections.shuffle(rowList);
-//    }
 
     int bottomIndex,upperIndex,gap,datazise;
-    public void setupArrListSample()
+    public List<String> setupArrListSample()
     {
+        if(currentRowIndex+samplePerInterval() >= datazise) {
+            //reset kalau sudah mentok
+            Collections.shuffle(listHBCSV);
+            currentRowIndex = 0;
+        }
+
         bottomIndex =  currentRowIndex;
         currentRowIndex+=samplePerInterval();
         upperIndex =  currentRowIndex;
@@ -132,20 +141,16 @@ public class MainActivity extends AppCompatActivity {
         gap = upperIndex - bottomIndex;
         datazise = listHBCSV.size();
 
+        Log.d(TAG,""+currentRowIndex+"  "+datazise);
+        List<String> ArrList = new ArrayList<String>();
         ArrList.clear();
-        if(currentRowIndex < datazise)
+
+        for(int i=bottomIndex;i<upperIndex;i++)
         {
-            for(int i=0;i<gap;i++)
-            {
-                ArrList.add(PostToServer.StringArrayCombine(listHBCSV.get(i)));
-            }
+            ArrList.add(PostToServer.StringArrayCombine(listHBCSV.get(i)));
         }
-        else
-        {
-            //reset kalau sudah mentok
-            Collections.shuffle(listHBCSV);
-            currentRowIndex = 0;
-        }
+
+        return ArrList;
 
     }
 
@@ -178,12 +183,35 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-            setupArrListSample();
-            mPostToServer.setPostParam(PostToServer.setJson("hb",ArrList));
+//            setupArrListSample();
+//            mPostToServer.setPostParam(PostToServer.setJson(glob.keyJson,setupArrListSample()));
+
 
 //            ArrList.add(PostToServer.StringArrayCombine(changedhb));
 
             tvSamplePerInterval.setText(""+samplePerInterval());
+        }
+    }
+
+    //## BUTTONLISTENER
+    public class clickListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            if (R.id.btnStartStop == v.getId()) {
+                if(startStop)
+                {
+                    startStop = false;
+                    tvLog.setText("Paused\n"+tvLog.getText());
+                    btnStartStop.setText("Start");
+                }
+                else
+                {
+                    startStop = true;
+                    tvLog.setText("Cont\n"+tvLog.getText());
+                    btnStartStop.setText("Pause");
+                }
+            }
         }
     }
 

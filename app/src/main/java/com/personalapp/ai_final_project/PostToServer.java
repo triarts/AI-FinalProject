@@ -52,6 +52,11 @@ public class PostToServer {
         this.postRequest(URL,con,postParam);
     }
 
+    public void bridge(List<String> arr, PostToServer mPostToServer,String jsonkey)
+    {
+        mPostToServer.setPostParam(PostToServer.setJson(jsonkey,arr));
+    }
+
     public void setTextViewLog(TextView tvlog)
     {
         this.tvLog = tvlog;
@@ -70,7 +75,8 @@ public class PostToServer {
                     @Override
                     public void onResponse(JSONObject response) {
                         Log.d(TAG, response.toString());
-                        tvLog.append(response.toString());
+                        tvLog.setText(response.toString()+tvLog.getText());
+                        //tvLog.append(response.toString());
                         Toast.makeText(con, response.toString(), Toast.LENGTH_SHORT).show();
                     }
                 }, new Response.ErrorListener() {

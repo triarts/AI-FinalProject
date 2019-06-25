@@ -2,8 +2,8 @@ package com.personalapp.ai_final_project;
 
 public class Global {
 
-    static String url_link,SETTING_FLAG,defaultURL,FILENAME,FILENAME2;
-    static int csv_full,csv_500,csv_filtered;
+    static String url_link,SETTING_FLAG,defaultURL,FILENAME,FILENAME2,keyJson;
+    static int csv_full,csv_500,csv_filtered,csv_small;
     public Global()
     {
         SETTING_FLAG = "setting_flag";
@@ -16,7 +16,10 @@ public class Global {
 
         csv_full = R.raw.mitbih_test_number_format;
         csv_500 = R.raw.mitbih_test;
+        csv_small = R.raw.mitbih_test_small;
         csv_filtered = 0;
+
+        keyJson = "hb";
     }
 
 
