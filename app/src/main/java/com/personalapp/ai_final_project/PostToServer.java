@@ -84,7 +84,7 @@ public class PostToServer {
                     @Override
                     public void onResponse(JSONObject response) {
                         Log.d(TAG, response.toString());
-                        tvLog.setText(response.toString()+tvLog.getText());
+                        tvLog.setText(response.toString()+"\n"+tvLog.getText());
                         //tvLog.append(response.toString());
                         //Toast.makeText(con, response.toString(), Toast.LENGTH_SHORT).show();
                     }

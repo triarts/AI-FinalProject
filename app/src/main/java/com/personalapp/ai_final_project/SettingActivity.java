@@ -48,12 +48,15 @@ public class SettingActivity extends AppCompatActivity {
         btnPatient.setOnClickListener(clickListener);
 
         //write
+        //1 tony stark
+        //2 chris evan
         sharedPref = getSharedPreferences(glob.SETTING_FLAG, MODE_PRIVATE);
         editor = sharedPref.edit();
         int lastPatientId = sharedPref.getInt(glob.patientId, 0);
         if(lastPatientId == 0)
         {
             editor.putInt(glob.patientId, 1);
+            //editor.putString(glob.patientName, "Tony");
             editor.apply();
         }
         else

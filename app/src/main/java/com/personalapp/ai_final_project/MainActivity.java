@@ -2,6 +2,7 @@ package com.personalapp.ai_final_project;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.inputmethodservice.Keyboard;
 import android.os.Build;
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     Toolbar myToolbar;
     Intent intent;
     TextView tvLog,tvHBnum,tvSamplePerInterval;
+    TextView tvPID,tvName,tvAge,tvGender;
     Global glob = new Global();
     CSVFile csvFile;
     SeekBar seekBarBpm,seekBarInterval;
@@ -49,6 +51,10 @@ public class MainActivity extends AppCompatActivity {
     final PostToServer mPostToServer = new PostToServer();
     String[] changedhb;
     List<String[]> listHBCSV;
+    int xSize = 5*187;
+    Viewport viewport;
+
+    SharedPreferences sharedPref;
 
     boolean flagRandom = true;
 
@@ -69,6 +75,13 @@ public class MainActivity extends AppCompatActivity {
         tvLog = (TextView) findViewById(R.id.tvLog);
         tvHBnum = (TextView) findViewById(R.id.tvHBasNumber);
         tvSamplePerInterval = (TextView)findViewById(R.id.tvSamplePerInterval);
+        tvPID = (TextView) findViewById(R.id.tvPID);
+        tvName = (TextView) findViewById(R.id.tvName);
+        tvAge = (TextView) findViewById(R.id.tvAge);
+        tvGender = (TextView) findViewById(R.id.tvGender);
+
+        sharedPref = getSharedPreferences(glob.SETTING_FLAG, MODE_PRIVATE);
+
         currentBpm = 60;
 
         btnStartStop = (Button) findViewById(R.id.btnStartStop);
@@ -96,16 +109,17 @@ public class MainActivity extends AppCompatActivity {
         datagraph =  (String[]) listHBCSV.get(rowcounter);
         GraphView graph = (GraphView) findViewById(R.id.graph);
         graph.getGridLabelRenderer().setGridStyle( GridLabelRenderer.GridStyle.NONE );
+        graph.getGridLabelRenderer().setHorizontalLabelsVisible(false);
         // data
         series = new LineGraphSeries<DataPoint>();
         graph.addSeries(series);
         // customize a little bit viewport
-        Viewport viewport = graph.getViewport();
+        viewport = graph.getViewport();
         viewport.setDrawBorder(true);
         viewport.setYAxisBoundsManual(true);
         viewport.setXAxisBoundsManual(true);
         viewport.setMinX(0);
-        viewport.setMaxX(1000);
+        viewport.setMaxX(xSize);
         viewport.setMinY(-0.1);
         viewport.setMaxY(1.5);
         viewport.setScrollable(true);
@@ -160,7 +174,13 @@ public class MainActivity extends AppCompatActivity {
     {
         float totalSample = ((float)currentBpm/60)*(float)fixedInterval;
         Log.d(TAG,String.valueOf(Math.ceil(totalSample)));
-        return (int)Math.ceil(totalSample); // real
+        int result = (int)Math.ceil(totalSample);
+        xSize = 187*result;
+        Log.d("aaaaaa",xSize+"");
+        viewport.setMinX(0);
+        viewport.setMaxX(xSize);
+        //viewport.setXAxisBoundsManual(true);
+        return result; // real
         //return 3; // testing
     }
 
@@ -279,10 +299,28 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        int lastPatientId = sharedPref.getInt(glob.patientId, 0);
+        if(lastPatientId == 1)
+        {
+            tvPID.setText("PID : 1");
+            tvName.setText("Name : Tony Stark");
+            tvAge.setText("Age : 56");
+            tvGender.setText("Gender : M");
+        }
+        else if(lastPatientId == 2)
+        {
+            tvPID.setText("PID : 2");
+            tvName.setText("Name : Jennifer Lawrence");
+            tvAge.setText("Age : 28");
+            tvGender.setText("Gender : F");
+        }
+
         // we're going to simulate real time with thread that append data to the graph
         new Thread(new Runnable() {
             @Override
             public void run() {
+
                 for (int i = 0; i <listHBCSV.size(); i++) {
                     runOnUiThread(new Runnable() {
                         @Override
@@ -306,7 +344,7 @@ public class MainActivity extends AppCompatActivity {
 
                     // sleep to slow down the add of entries
                     try {
-                        Thread.sleep(5000);
+                        Thread.sleep(2000);
                     } catch (InterruptedException e) {
                         // manage error ...
                     }
@@ -318,9 +356,10 @@ public class MainActivity extends AppCompatActivity {
     // add random data to graph
     Double dataInput;
     private void addEntry() {
+        datagraph = (String[]) listHBCSV.get(rowcounter);
             dataInput = Double.parseDouble(datagraph[counter]);
             // here, we choose to display max 10 points on the viewport and we scroll to end
-            series.appendData(new DataPoint(lastX++, dataInput), true, 935);
+            series.appendData(new DataPoint(lastX++, dataInput), true, xSize);
     }
     //###GRAPH
 }
