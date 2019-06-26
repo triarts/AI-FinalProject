@@ -19,6 +19,12 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.GridLabelRenderer;
+import com.jjoe64.graphview.Viewport;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,6 +51,13 @@ public class MainActivity extends AppCompatActivity {
     List<String[]> listHBCSV;
 
     boolean flagRandom = true;
+
+    //## graph
+    private LineGraphSeries<DataPoint> series;
+    private int lastX = 0;
+    private int rowcounter=0;
+    private String[] datagraph;
+    private int counter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,6 +92,26 @@ public class MainActivity extends AppCompatActivity {
             Collections.shuffle(listHBCSV);
         }
 
+        //###GRAPH
+        datagraph =  (String[]) listHBCSV.get(rowcounter);
+        GraphView graph = (GraphView) findViewById(R.id.graph);
+        graph.getGridLabelRenderer().setGridStyle( GridLabelRenderer.GridStyle.NONE );
+        // data
+        series = new LineGraphSeries<DataPoint>();
+        graph.addSeries(series);
+        // customize a little bit viewport
+        Viewport viewport = graph.getViewport();
+        viewport.setDrawBorder(true);
+        viewport.setYAxisBoundsManual(true);
+        viewport.setXAxisBoundsManual(true);
+        viewport.setMinX(0);
+        viewport.setMaxX(1000);
+        viewport.setMinY(-0.1);
+        viewport.setMaxY(1.5);
+        viewport.setScrollable(true);
+        //###GRAPH
+
+
         //tvLog.append(PostToServer.StringArrayCombine(list.get(0)));
 
 
@@ -89,7 +122,8 @@ public class MainActivity extends AppCompatActivity {
         //PostToServer.postRequest(glob.defaultURL,MainActivity.this,PostToServer.setJson("hb",ArrList));
         setupArrListSample();
         mPostToServer.setTextViewLog(tvLog);
-        mPostToServer.setAllVariable(glob.defaultURL,MainActivity.this,PostToServer.setJson(glob.keyJson,setupArrListSample()));
+        mPostToServer.setShared(MainActivity.this);
+        mPostToServer.setAllVariable(glob.defaultURL,PostToServer.setJson(glob.keyJson,setupArrListSample()));
 
 
 
@@ -240,31 +274,53 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public  boolean isStoragePermissionGranted() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    == PackageManager.PERMISSION_GRANTED) {
-                Log.v(TAG,"Permission is granted");
-                return true;
-            } else {
 
-                Log.v(TAG,"Permission is revoked");
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-                return false;
-            }
-        }
-        else { //permission is automatically granted on sdk<23 upon installation
-            Log.v(TAG,"Permission is granted");
-            return true;
-        }
-    }
-
+    //###GRAPH
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-            Log.v(TAG,"Permission: "+permissions[0]+ "was "+grantResults[0]);
-            //resume tasks needing this permission
-        }
+    protected void onResume() {
+        super.onResume();
+        // we're going to simulate real time with thread that append data to the graph
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i <listHBCSV.size(); i++) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            for(int i=0;i<187;i++)
+                            {
+                                if(counter < datagraph.length-1)
+                                {
+                                    addEntry();
+                                    counter+=1;
+                                }
+                                else{
+                                    rowcounter++;
+                                    counter=0;
+
+                                }
+                            }
+
+                        }
+                    });
+
+                    // sleep to slow down the add of entries
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                        // manage error ...
+                    }
+                }
+            }
+        }).start();
     }
+
+    // add random data to graph
+    Double dataInput;
+    private void addEntry() {
+            dataInput = Double.parseDouble(datagraph[counter]);
+            // here, we choose to display max 10 points on the viewport and we scroll to end
+            series.appendData(new DataPoint(lastX++, dataInput), true, 935);
+    }
+    //###GRAPH
 }

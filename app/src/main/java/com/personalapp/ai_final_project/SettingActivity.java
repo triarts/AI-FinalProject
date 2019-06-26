@@ -27,7 +27,7 @@ import java.util.Map;
 public class SettingActivity extends AppCompatActivity {
 
     EditText etURL;
-    Button btnCheck;
+    Button btnCheck,btnPatient;
     TextView tvSavedUrL;
     clickListener clickListener = new clickListener();
     Global glob = new Global();
@@ -41,13 +41,25 @@ public class SettingActivity extends AppCompatActivity {
         etURL = (EditText) findViewById(R.id.etURL);
         tvSavedUrL = (TextView) findViewById(R.id.tvSavedURL);
         btnCheck = (Button) findViewById(R.id.btnCheck);
+        btnPatient = (Button) findViewById(R.id.btnPatient);
 
 
         btnCheck.setOnClickListener(clickListener);
+        btnPatient.setOnClickListener(clickListener);
 
         //write
-//        sharedPref = getSharedPreferences(glob.SETTING_FLAG, MODE_PRIVATE);
-//        editor = sharedPref.edit();
+        sharedPref = getSharedPreferences(glob.SETTING_FLAG, MODE_PRIVATE);
+        editor = sharedPref.edit();
+        int lastPatientId = sharedPref.getInt(glob.patientId, 0);
+        if(lastPatientId == 0)
+        {
+            editor.putInt(glob.patientId, 1);
+            editor.apply();
+        }
+        else
+        {
+            btnPatient.setText("Patient "+lastPatientId);
+        }
 //        editor.putInt(glob.url_link, newHighScore);
 //        editor.apply();
 
@@ -82,6 +94,25 @@ public class SettingActivity extends AppCompatActivity {
                 //if connect
                 // save url at shared preferences
                 //Toast.makeText(SettingActivity.this, "btn clicked", Toast.LENGTH_LONG).show();
+            }
+            if(R.id.btnPatient == v.getId())
+            {
+                int lastPatientId = sharedPref.getInt(glob.patientId, 0);
+                if(lastPatientId == 1)
+                {
+                    editor.putInt(glob.patientId, 2);
+                    editor.apply();
+                    btnPatient.setText("Patient 2");
+                }
+                else if(lastPatientId == 2)
+                {
+                    editor.putInt(glob.patientId, 1);
+                    editor.apply();
+                    btnPatient.setText("Patient 1");
+                }
+
+                int currID = sharedPref.getInt(glob.patientId, 0);
+                Toast.makeText(SettingActivity.this, "patient Id : "+currID, Toast.LENGTH_LONG).show();
             }
         }
     }

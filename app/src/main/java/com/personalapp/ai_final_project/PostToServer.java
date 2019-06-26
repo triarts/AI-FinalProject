@@ -1,6 +1,7 @@
 package com.personalapp.ai_final_project;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,10 +26,12 @@ public class PostToServer {
     Context con;
     Map<String, String> postParam;
     static TextView tvLog;
-
+    static SharedPreferences sharedPref;
+    static Global glob = new Global();
     public PostToServer() {
 
     }
+
 
     public PostToServer(String url, final Context con, Map<String, String> postParam) {
         this.URL = url;
@@ -36,11 +39,17 @@ public class PostToServer {
         this.postParam = postParam;
     }
 
-    public void setAllVariable(String url, final Context con, Map<String, String> postParam)
+    public void setShared(final Context con)
+    {
+        this.con = con;
+        sharedPref = con.getSharedPreferences(glob.SETTING_FLAG, con.MODE_PRIVATE);
+    }
+
+    public void setAllVariable(String url , Map<String, String> postParam)
     {
         this.URL = url;
-        this.con = con;
         this.postParam = postParam;
+
     }
 
     public void setPostParam(Map<String, String> postParam) {
@@ -114,7 +123,11 @@ public class PostToServer {
     public static Map<String, String> setJson(String Name, List<String> valList)
     {
         Map<String, String> postParam= new HashMap<String, String>();
+        //#set Size
         postParam.put("HBCount",String.valueOf(valList.size()));
+        //#set PatientId
+        int patientID = sharedPref.getInt(glob.patientId, 0);
+        postParam.put("PID",String.valueOf(patientID));//patientID
         for(int i=0;i<valList.size();i++)
         {
             postParam.put(Name+i, valList.get(i));

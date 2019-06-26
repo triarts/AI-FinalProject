@@ -2,12 +2,13 @@ package com.personalapp.ai_final_project;
 
 public class Global {
 
-    static String url_link,SETTING_FLAG,defaultURL,FILENAME,FILENAME2,keyJson;
+    static String url_link,SETTING_FLAG,defaultURL,FILENAME,FILENAME2,keyJson,patientId;
     static int csv_full,csv_500,csv_filtered,csv_small;
     public Global()
     {
         SETTING_FLAG = "setting_flag";
         url_link = "URLLINK";
+        patientId = "patientId";
 
 
         FILENAME = "raw/mitbih_test_number_format.csv";
