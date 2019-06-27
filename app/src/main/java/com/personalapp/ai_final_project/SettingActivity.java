@@ -115,7 +115,8 @@ public class SettingActivity extends AppCompatActivity {
                 }
 
                 int currID = sharedPref.getInt(glob.patientId, 0);
-                Toast.makeText(SettingActivity.this, "patient Id : "+currID, Toast.LENGTH_LONG).show();
+                Toast.makeText(SettingActivity.this, "patient Id : "+currID, Toast.LENGTH_SHORT).show();
+                Toast.makeText(SettingActivity.this, "Please restart app to take effect", Toast.LENGTH_SHORT).show();
             }
         }
     }

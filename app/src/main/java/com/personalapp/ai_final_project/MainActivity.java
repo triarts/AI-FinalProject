@@ -97,7 +97,22 @@ public class MainActivity extends AppCompatActivity {
         seekBarInterval.setOnSeekBarChangeListener(mSeekbarListener);
 
 
-        InputStream inputStream = getResources().openRawResource(glob.csv_filtered);
+        int lastPatientId = sharedPref.getInt(glob.patientId, 0);
+        InputStream inputStream;
+        if(lastPatientId == 1)
+        {
+            inputStream = getResources().openRawResource(glob.csv_uid_1);
+            //inputStream = getResources().openRawResource(glob.csv_uid_2);
+        }
+        else if (lastPatientId == 2)
+        {
+            inputStream = getResources().openRawResource(glob.csv_uid_2);
+        }
+        else
+        {
+            inputStream = getResources().openRawResource(glob.csv_filtered);
+        }
+
         csvFile = new CSVFile(inputStream);
         listHBCSV = csvFile.read();
         if(flagRandom)
@@ -303,14 +318,14 @@ public class MainActivity extends AppCompatActivity {
         int lastPatientId = sharedPref.getInt(glob.patientId, 0);
         if(lastPatientId == 1)
         {
-            tvPID.setText("PID : 1");
+            tvPID.setText("UID : 1");
             tvName.setText("Name : Tony Stark");
             tvAge.setText("Age : 56");
             tvGender.setText("Gender : M");
         }
         else if(lastPatientId == 2)
         {
-            tvPID.setText("PID : 2");
+            tvPID.setText("UID : 2");
             tvName.setText("Name : Jennifer Lawrence");
             tvAge.setText("Age : 28");
             tvGender.setText("Gender : F");
